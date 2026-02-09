@@ -1,0 +1,10 @@
+# .dockerignore pour le backend
+node_modules
+dist
+npm-debug.log
+.env
+.git
+.vscode
+Dockerfile
+README.md
+test
