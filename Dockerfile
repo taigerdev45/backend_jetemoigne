@@ -1,6 +1,9 @@
 # Dockerfile pour le déploiement sur Render
 FROM node:22-alpine
 
+# Installation des dépendances système nécessaires pour Prisma sur Alpine
+RUN apk add --no-cache openssl
+
 # Définition du répertoire de travail
 WORKDIR /app
 
@@ -15,8 +18,8 @@ RUN npm install
 # Copie du reste des fichiers
 COPY . .
 
-# Génération du client Prisma
-RUN npx prisma generate
+# Fix des permissions pour les binaires locaux et génération du client Prisma
+RUN chmod +x node_modules/.bin/prisma && npx prisma generate
 
 # Build de l'application NestJS
 RUN npm run build
