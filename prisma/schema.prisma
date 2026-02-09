@@ -1,0 +1,260 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  super_admin
+  admin
+  manager
+  accountant
+  observer
+}
+
+enum ProgramCategory {
+  info
+  jeunesse_cinema
+  divertissement
+  podcast
+  evangelisation
+  concert
+  temoignage_live
+  autre
+}
+
+enum ContentFormat {
+  video
+  audio
+  ecrit
+  image
+}
+
+enum TestimonyStatus {
+  recu
+  en_lecture
+  valide
+  rejete
+  programme
+}
+
+enum SupportType {
+  don_financier
+  don_materiel
+  benevolat
+  partenariat
+  achat_ouvrage
+  paiement_pub
+}
+
+enum TransactionStatus {
+  en_attente
+  verifie
+  rejete
+}
+
+model Profile {
+  id         String   @id @db.Uuid
+  email      String   @unique
+  fullName   String?  @map("full_name")
+  role       UserRole @default(observer)
+  avatarUrl  String?  @map("avatar_url")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  programsCreated Program[]      @relation("ProgramCreator")
+  testimonies     Testimony[]    @relation("TestimonyReviewer")
+  transactions    Transaction[]  @relation("TransactionValidator")
+  projects        ProjectTeam[]
+
+  @@map("profiles")
+}
+
+model Program {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String
+  slug         String          @unique
+  description  String?
+  category     ProgramCategory
+  format       ContentFormat
+  thumbnailUrl String?         @map("thumbnail_url")
+  videoUrl     String?         @map("video_url")
+  audioUrl     String?         @map("audio_url")
+  contentText  String?         @map("content_text")
+  isFeatured   Boolean         @default(false) @map("is_featured")
+  isLive       Boolean         @default(false) @map("is_live")
+  viewsCount   BigInt          @default(0) @map("views_count")
+  createdBy    String?         @map("created_by") @db.Uuid
+  publishedAt  DateTime?       @map("published_at") @db.Timestamptz
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  creator      Profile?        @relation("ProgramCreator", fields: [createdBy], references: [id])
+
+  @@map("programs")
+}
+
+model Testimony {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authorName   String?         @default("Anonyme") @map("author_name")
+  authorEmail  String?         @map("author_email")
+  title        String?
+  contentText  String?         @map("content_text")
+  mediaUrl     String?         @map("media_url")
+  mediaType    ContentFormat   @map("media_type")
+  status       TestimonyStatus @default(recu)
+  adminNotes   String?         @map("admin_notes")
+  reviewedBy   String?         @map("reviewed_by") @db.Uuid
+  scheduledFor DateTime?       @map("scheduled_for") @db.Timestamptz
+  createdAt    DateTime        @default(now()) @map("created_at") @db.Timestamptz
+
+  reviewer     Profile?        @relation("TestimonyReviewer", fields: [reviewedBy], references: [id])
+
+  @@map("testimonies")
+}
+
+model Project {
+  id              String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String
+  vision          String?
+  values          String?
+  needs           String?
+  goalAmount      Decimal?           @map("goal_amount") @db.Decimal(12, 2)
+  currentAmount   Decimal?           @default(0) @map("current_amount") @db.Decimal(12, 2)
+  progressPercent Int?               @default(0) @map("progress_percent")
+  status          String?            @default("en_cours")
+  coverImageUrl   String?            @map("cover_image_url")
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz
+
+  milestones      ProjectMilestone[]
+  team            ProjectTeam[]
+  transactions    Transaction[]
+
+  @@map("projects")
+}
+
+model ProjectMilestone {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  projectId   String   @map("project_id") @db.Uuid
+  title       String
+  isCompleted Boolean  @default(false) @map("is_completed")
+  dueDate     DateTime? @map("due_date") @db.Date
+
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_milestones")
+}
+
+model ProjectTeam {
+  projectId     String  @map("project_id") @db.Uuid
+  userId        String  @map("user_id") @db.Uuid
+  roleInProject String? @map("role_in_project")
+
+  project       Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user          Profile @relation(fields: [userId], references: [id])
+
+  @@id([projectId, userId])
+  @@map("project_team")
+}
+
+model Transaction {
+  id                String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  donorName         String?           @map("donor_name")
+  donorEmail        String?           @map("donor_email")
+  donorPhone        String?           @map("donor_phone")
+  amount            Decimal           @db.Decimal(12, 2)
+  currency          String?           @default("XAF")
+  transactionType   SupportType       @map("transaction_type")
+  paymentMethod     String?           @map("payment_method")
+  proofScreenshotUrl String?          @map("proof_screenshot_url")
+  transactionRefId  String?           @map("transaction_ref_id")
+  status            TransactionStatus @default(en_attente)
+  validatedBy       String?           @map("validated_by") @db.Uuid
+  projectId         String?           @map("project_id") @db.Uuid
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  validator         Profile?          @relation("TransactionValidator", fields: [validatedBy], references: [id])
+  project           Project?          @relation(fields: [projectId], references: [id])
+
+  @@map("transactions")
+}
+
+model Volunteer {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  fullName     String   @map("full_name")
+  email        String?
+  phone        String?
+  skills       String[]
+  availability String?
+  status       String?  @default("actif")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("volunteers")
+}
+
+model Partner {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  activityDomain String?  @map("activity_domain")
+  country        String?
+  logoUrl        String?  @map("logo_url")
+  websiteUrl     String?  @map("website_url")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("partners")
+}
+
+model Book {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title          String
+  author         String?
+  description    String?
+  price          Decimal? @default(0) @db.Decimal(10, 2)
+  isFree         Boolean  @default(false) @map("is_free")
+  pdfUrl         String   @map("pdf_url")
+  coverUrl       String?  @map("cover_url")
+  downloadsCount Int?     @default(0) @map("downloads_count")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("books")
+}
+
+model Ad {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clientName   String        @map("client_name")
+  mediaUrl     String        @map("media_url")
+  mediaType    ContentFormat @map("media_type")
+  redirectUrl  String?       @map("redirect_url")
+  startDate    DateTime?     @map("start_date") @db.Timestamptz
+  endDate      DateTime?     @map("end_date") @db.Timestamptz
+  isActive     Boolean       @default(true) @map("is_active")
+  clicksCount  Int?          @default(0) @map("clicks_count")
+  viewsCount   Int?          @default(0) @map("views_count")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("ads")
+}
+
+model AppSettings {
+  id             Int      @id @default(1)
+  airtelNumber   String?  @map("airtel_number")
+  moovNumber     String?  @map("moov_number")
+  maintenanceMode Boolean @default(false) @map("maintenance_mode")
+  contactEmail   String?  @map("contact_email")
+  donationRules  String?  @map("donation_rules")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("app_settings")
+}
+
+model AnalyticsDaily {
+  date        DateTime @id @default(dbgenerated("CURRENT_DATE")) @db.Date
+  totalVisits Int?     @default(0) @map("total_visits")
+  pageViews   Json?    @map("page_views")
+  deviceStats Json?    @map("device_stats")
+
+  @@map("analytics_daily")
+}
