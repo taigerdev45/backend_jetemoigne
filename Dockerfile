@@ -18,8 +18,8 @@ RUN npm install
 # Copie du reste des fichiers
 COPY . .
 
-# Fix des permissions pour les binaires locaux et génération du client Prisma
-RUN chmod +x node_modules/.bin/prisma && npx prisma generate
+# Fix des permissions pour tous les binaires locaux et génération du client Prisma
+RUN chmod -R +x node_modules/.bin && npx prisma generate
 
 # Build de l'application NestJS
 RUN npm run build
