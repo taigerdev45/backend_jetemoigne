@@ -25,10 +25,10 @@ async function bootstrap() {
   SwaggerModule.setup('api/docs', app, document);
 
   const port = process.env.PORT ?? 3001;
-  await app.listen(port);
-  logger.log(`Application is running on: http://localhost:${port}`);
+  await app.listen(port, '0.0.0.0');
+  logger.log(`Application is running on: http://0.0.0.0:${port}`);
   logger.log(
-    `Swagger documentation available on: http://localhost:${port}/api/docs`,
+    `Swagger documentation available on: http://0.0.0.0:${port}/api/docs`,
   );
 }
 void bootstrap();
