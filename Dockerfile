@@ -1,35 +1,47 @@
-# Dockerfile pour le déploiement sur Render
-FROM node:22-alpine
+# Étape 1 : Construction (Build)
+FROM node:22-alpine AS builder
 
-# Installation des dépendances système nécessaires pour Prisma sur Alpine
+# Installation des dépendances système pour Prisma
 RUN apk add --no-cache openssl
 
-# Définition du répertoire de travail
 WORKDIR /app
 
-# Installation des dépendances
-# On copie les fichiers de package séparément pour profiter du cache Docker
+# Copie des fichiers de configuration
 COPY package*.json ./
 COPY prisma ./prisma/
 
-# Installation des dépendances incluant les devDeps pour le build
+# Installation de toutes les dépendances (y compris devDeps pour le build)
 RUN npm install
 
-# Copie du reste des fichiers
+# Copie du code source
 COPY . .
 
-# Fix des permissions pour tous les binaires locaux et génération du client Prisma
-RUN chmod -R +x node_modules/.bin && npx prisma generate
+# Suppression préventive des scripts utilitaires qui pourraient faire échouer le build NestJS
+RUN rm -f create-admin.ts create-admin.js
 
-# Build de l'application NestJS
-RUN npm run build
+# Génération du client Prisma et Build du projet
+RUN npx prisma generate && npm run build
 
-# Nettoyage des dépendances de développement pour réduire la taille de l'image
+# Étape 2 : Exécution (Runtime)
+FROM node:22-alpine
+
+RUN apk add --no-cache openssl
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copie des fichiers nécessaires depuis l'étape de build
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+
+# On ne garde que les dépendances de production pour alléger l'image
 RUN npm prune --production
 
 # Exposition du port (Render utilise process.env.PORT)
 EXPOSE 3001
 
 # Commande de démarrage
-# On utilise start:prod qui lance node dist/main
 CMD ["npm", "run", "start:prod"]
