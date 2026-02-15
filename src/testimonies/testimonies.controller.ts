@@ -54,9 +54,10 @@ export class TestimoniesController {
             };
 
             return await this.testimoniesService.create(sanitizedData);
-        } catch (error) {
-            console.error('Erreur lors de la création du témoignage:', error);
-            throw error;
+        } catch (error: any) {
+            console.error('Erreur détaillée lors de la création du témoignage:', error);
+            // On renvoie un message plus explicite pour débugger
+            throw new Error(`Erreur Interne: ${error.message || 'Inconnue'}`);
         }
     }
 

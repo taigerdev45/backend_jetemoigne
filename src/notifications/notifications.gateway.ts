@@ -68,7 +68,11 @@ export class NotificationsGateway
      * Émettre une notification à tous les administrateurs
      */
     notifyAdmins(event: string, payload: any) {
-        this.server.to('admins').emit(event, payload);
+        if (this.server) {
+            this.server.to('admins').emit(event, payload);
+        } else {
+            console.warn('Notification Gateway: Server not initialized, skipping emit.');
+        }
     }
 
     /**

@@ -22,9 +22,12 @@ export class StorageService {
      * Uploader un fichier vers un bucket Supabase
      */
     async uploadFile(file: any, bucket: string): Promise<string> {
-        if (!file) throw new Error('Aucun fichier fourni');
+        if (!file || !file.buffer) {
+            this.logger.error('Fichier ou buffer manquant dans la requête');
+            throw new Error('Données de fichier invalides ou manquantes');
+        }
 
-        const fileExt = file.originalname.split('.').pop();
+        const fileExt = file.originalname ? file.originalname.split('.').pop() : 'bin';
         const fileName = `${uuidv4()}.${fileExt}`;
         const filePath = `${fileName}`;
 
