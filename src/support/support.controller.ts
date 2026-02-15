@@ -45,7 +45,12 @@ export class SupportController {
         }
 
         return this.supportService.createDonation({
-            ...donationDto,
+            donorName: donationDto.donorName,
+            donorEmail: donationDto.donorEmail,
+            donorPhone: donationDto.donorPhone,
+            currency: donationDto.currency,
+            transactionRefId: donationDto.transactionReference,
+            projectId: donationDto.projectId,
             proofScreenshotUrl,
             amount: parseFloat(donationDto.amount),
         });

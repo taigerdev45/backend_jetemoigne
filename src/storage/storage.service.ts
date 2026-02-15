@@ -8,10 +8,14 @@ export class StorageService {
     private readonly logger = new Logger(StorageService.name);
 
     constructor() {
-        this.supabase = createClient(
-            process.env.SUPABASE_URL || '',
-            process.env.SUPABASE_KEY || '',
-        );
+        const url = process.env.SUPABASE_URL;
+        const key = process.env.SUPABASE_KEY;
+
+        if (!url || !key) {
+            this.logger.error('SUPABASE_URL ou SUPABASE_KEY manquante dans les variables d\'environnement');
+        }
+
+        this.supabase = createClient(url || '', key || '');
     }
 
     /**

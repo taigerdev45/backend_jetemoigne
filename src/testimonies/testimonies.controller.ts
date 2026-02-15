@@ -23,7 +23,7 @@ export class TestimoniesController {
                 authorEmail: { type: 'string' },
                 title: { type: 'string' },
                 contentText: { type: 'string' },
-                mediaType: { type: 'string', enum: ['video', 'audio', 'ecrit'] },
+                mediaType: { type: 'string', enum: ['video', 'audio', 'ecrit', 'image'] },
                 file: { type: 'string', format: 'binary' },
             },
             required: ['authorName', 'mediaType'],
@@ -37,15 +37,27 @@ export class TestimoniesController {
     ) {
         let mediaUrl = dto.mediaUrl;
 
-        // Si un fichier est fourni, on l'uploade sur Supabase (bucket testimonies-media)
-        if (file) {
-            mediaUrl = await this.storageService.uploadFile(file, 'testimonies-media');
-        }
+        try {
+            // Si un fichier est fourni, on l'uploade sur Supabase (bucket testimonies-media)
+            if (file) {
+                mediaUrl = await this.storageService.uploadFile(file, 'testimonies-media');
+            }
 
-        return this.testimoniesService.create({
-            ...dto,
-            mediaUrl,
-        });
+            // On filtre les données pour ne passer que ce qui est attendu par le service (et Prisma)
+            const sanitizedData = {
+                authorName: dto.authorName,
+                authorEmail: dto.authorEmail,
+                title: dto.title,
+                contentText: dto.contentText,
+                mediaType: dto.mediaType,
+                mediaUrl,
+            };
+
+            return await this.testimoniesService.create(sanitizedData);
+        } catch (error) {
+            console.error('Erreur lors de la création du témoignage:', error);
+            throw error;
+        }
     }
 
     @Get()
