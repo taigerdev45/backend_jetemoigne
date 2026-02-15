@@ -20,7 +20,7 @@ COPY . .
 RUN rm -f create-admin.ts create-admin.js
 
 # Génération du client Prisma et Build du projet
-RUN npx prisma generate && npm run build
+RUN chmod -R +x node_modules/.bin && npx prisma generate && npm run build
 
 # Étape 2 : Exécution (Runtime)
 FROM node:22-alpine
