@@ -1,11 +1,13 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  schemas   = ["public", "auth"]
 }
 
 enum UserRole {
@@ -14,6 +16,8 @@ enum UserRole {
   manager
   accountant
   observer
+
+  @@schema("public")
 }
 
 enum ProgramCategory {
@@ -25,6 +29,8 @@ enum ProgramCategory {
   concert
   temoignage_live
   autre
+
+  @@schema("public")
 }
 
 enum ContentFormat {
@@ -32,6 +38,8 @@ enum ContentFormat {
   audio
   ecrit
   image
+
+  @@schema("public")
 }
 
 enum TestimonyStatus {
@@ -40,6 +48,8 @@ enum TestimonyStatus {
   valide
   rejete
   programme
+
+  @@schema("public")
 }
 
 enum SupportType {
@@ -49,12 +59,16 @@ enum SupportType {
   partenariat
   achat_ouvrage
   paiement_pub
+
+  @@schema("public")
 }
 
 enum TransactionStatus {
   en_attente
   verifie
   rejete
+
+  @@schema("public")
 }
 
 model Profile {
@@ -71,7 +85,20 @@ model Profile {
   transactions    Transaction[]  @relation("TransactionValidator")
   projects        ProjectTeam[]
 
+  // Link to Supabase Auth user
+  user           User           @relation(fields: [id], references: [id])
+
   @@map("profiles")
+  @@schema("public")
+}
+
+model User {
+  id String @id @db.Uuid
+
+  Profile Profile?
+
+  @@map("users")
+  @@schema("auth")
 }
 
 model Program {
@@ -95,6 +122,7 @@ model Program {
   creator      Profile?        @relation("ProgramCreator", fields: [createdBy], references: [id])
 
   @@map("programs")
+  @@schema("public")
 }
 
 model Testimony {
@@ -114,6 +142,7 @@ model Testimony {
   reviewer     Profile?        @relation("TestimonyReviewer", fields: [reviewedBy], references: [id])
 
   @@map("testimonies")
+  @@schema("public")
 }
 
 model Project {
@@ -134,6 +163,7 @@ model Project {
   transactions    Transaction[]
 
   @@map("projects")
+  @@schema("public")
 }
 
 model ProjectMilestone {
@@ -146,6 +176,7 @@ model ProjectMilestone {
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@map("project_milestones")
+  @@schema("public")
 }
 
 model ProjectTeam {
@@ -158,6 +189,7 @@ model ProjectTeam {
 
   @@id([projectId, userId])
   @@map("project_team")
+  @@schema("public")
 }
 
 model Transaction {
@@ -180,6 +212,7 @@ model Transaction {
   project           Project?          @relation(fields: [projectId], references: [id])
 
   @@map("transactions")
+  @@schema("public")
 }
 
 model Volunteer {
@@ -193,6 +226,7 @@ model Volunteer {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("volunteers")
+  @@schema("public")
 }
 
 model Partner {
@@ -205,6 +239,7 @@ model Partner {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("partners")
+  @@schema("public")
 }
 
 model Book {
@@ -220,6 +255,7 @@ model Book {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("books")
+  @@schema("public")
 }
 
 model Ad {
@@ -236,6 +272,7 @@ model Ad {
   createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
 
   @@map("ads")
+  @@schema("public")
 }
 
 model AppSettings {
@@ -248,6 +285,7 @@ model AppSettings {
   updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("app_settings")
+  @@schema("public")
 }
 
 model AnalyticsDaily {
@@ -257,4 +295,5 @@ model AnalyticsDaily {
   deviceStats Json?    @map("device_stats")
 
   @@map("analytics_daily")
+  @@schema("public")
 }

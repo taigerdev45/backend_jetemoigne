@@ -43,6 +43,13 @@ lerna-debug.log*
 # Prisma
 /prisma/*.db
 /prisma/*.db-journal
+/prisma/*.bak
+
+# Migration scripts (temporary)
+sync-db-manual.js
+apply-migration-safe.js
+migrate.sql
+migrate_utf8.sql
 
 # Env
 .env

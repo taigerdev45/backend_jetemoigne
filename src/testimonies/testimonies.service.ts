@@ -17,21 +17,28 @@ export class TestimoniesService {
         mediaUrl?: string;
         mediaType: any;
     }) {
-        const testimony = await (this.prisma as any).testimony.create({
-            data: {
-                ...data,
-                status: 'recu', // Default status for new testimonies
-            },
-        });
+        try {
+            const testimony = await (this.prisma as any).testimony.create({
+                data: {
+                    ...data,
+                    status: 'recu', // Default status for new testimonies
+                },
+            });
 
-        // Notifier les admins en temps réel
-        this.notificationsGateway.notifyAdmins('testimony_received', {
-            id: testimony.id,
-            authorName: testimony.authorName,
-            title: testimony.title,
-        });
+            // Notifier les admins en temps réel
+            if (this.notificationsGateway) {
+                this.notificationsGateway.notifyAdmins('testimony_received', {
+                    id: testimony.id,
+                    authorName: testimony.authorName,
+                    title: testimony.title,
+                });
+            }
 
-        return testimony;
+            return testimony;
+        } catch (error: any) {
+            console.error('TestimoniesService: Erreur lors de la creation Prisma:', error);
+            throw error;
+        }
     }
 
     async findPublic(query: { page?: number; limit?: number }) {
