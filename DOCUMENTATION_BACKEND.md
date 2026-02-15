@@ -108,3 +108,30 @@ Le module d'analyse fournit des agrégations via Prisma :
 
 > [!IMPORTANT]
 > Ne jamais supprimer manuellement des fichiers dans Supabase Storage sous peine de briser les liens stockés en base de données. Utilisez toujours les endpoints DELETE de l'API.
+---
+
+## 🧪 8. Guide de Recette (Tests Manuels)
+
+### A. Utilisation de Swagger (Le plus simple)
+Idéal pour tester rapidement sans rien installer.
+1.  **Accès** : Ouvrez [Swagger UI](https://backend-jetemoigne-458j.onrender.com/api/docs).
+2.  **Authentification** : 
+    *   Utilisez l'endpoint `POST /api/v1/auth/login` pour obtenir un `access_token`.
+    *   Remontez en haut de la page, cliquez sur le bouton vert **Authorize**.
+    *   Collez le token et validez.
+3.  **Tester un endpoint** :
+    *   Cliquez sur l'endpoint souhaité (ex: `POST /api/v1/testimonies`).
+    *   Cliquez sur **Try it out**.
+    *   Remplissez les champs (pour le champ `file`, sélectionnez un fichier sur votre PC).
+    *   Cliquez sur le gros bouton bleu **Execute**.
+
+### B. Utilisation de Postman
+Idéal pour des tests plus structurés et répétitifs.
+1.  **Import** : Dans Postman, cliquez sur **Import** et glissez le fichier `JeTemoigne_V1.2.postman_collection.json` (à la racine du projet).
+2.  **Configuration** :
+    *   La variable `base_url` est déjà réglée sur l'URL Render.
+    *   Pour les routes protégées, allez dans l'onglet **Auth**, choisissez **Bearer Token**, et collez votre token.
+3.  **Upload de fichiers** :
+    *   Dans l'onglet **Body**, sélectionnez **form-data**.
+    *   Dans la colonne `KEY`, changez le type de `Text` à `File` pour le champ `file`.
+    *   Sélectionnez votre fichier local et envoyez.
