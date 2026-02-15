@@ -1,17 +1,51 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { TestimoniesService } from './testimonies.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { StorageService } from '../storage/storage.service';
 
 @ApiTags('testimonies')
 @Controller('api/v1/testimonies')
 export class TestimoniesController {
-    constructor(private readonly testimoniesService: TestimoniesService) { }
+    constructor(
+        private readonly testimoniesService: TestimoniesService,
+        private readonly storageService: StorageService,
+    ) { }
 
     @Post()
     @ApiOperation({ summary: 'Soumettre un nouveau témoignage (Public)' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                authorName: { type: 'string' },
+                authorEmail: { type: 'string' },
+                title: { type: 'string' },
+                contentText: { type: 'string' },
+                mediaType: { type: 'string', enum: ['video', 'audio', 'ecrit'] },
+                file: { type: 'string', format: 'binary' },
+            },
+            required: ['authorName', 'mediaType'],
+        },
+    })
     @ApiResponse({ status: 201, description: 'Témoignage reçu avec succès.' })
-    async create(@Body() createDto: any) {
-        return this.testimoniesService.create(createDto);
+    @UseInterceptors(FileInterceptor('file'))
+    async create(
+        @Body() dto: any,
+        @UploadedFile() file?: any,
+    ) {
+        let mediaUrl = dto.mediaUrl;
+
+        // Si un fichier est fourni, on l'uploade sur Supabase (bucket testimonies-media)
+        if (file) {
+            mediaUrl = await this.storageService.uploadFile(file, 'testimonies-media');
+        }
+
+        return this.testimoniesService.create({
+            ...dto,
+            mediaUrl,
+        });
     }
 
     @Get()

@@ -1,0 +1,140 @@
+{
+    "info": {
+        "_postman_id": "8ee92bbf-64af-40ad-b410-6d1bde5346bb",
+        "name": "JeTemoigne_TV_Backend_V1.2",
+        "description": "Collection pour tester manuellement le backend Je Temoigne-TV.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Login Admin",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@jetemoigne.tv\",\n    \"password\": \"votre_password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Public",
+            "item": [
+                {
+                    "name": "Home Page Data",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/public-hub/home",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "public-hub",
+                                "home"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "List Programs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/programs/list",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "programs",
+                                "list"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Testimonies",
+            "item": [
+                {
+                    "name": "Submit Testimony",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "authorName",
+                                    "value": "Fidèle Test",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "title",
+                                    "value": "Miracle",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "mediaType",
+                                    "value": "ecrit",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": ""
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/testimonies",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "testimonies"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "https://backend-jetemoigne-458j.onrender.com"
+        }
+    ]
+}

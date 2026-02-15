@@ -1,17 +1,54 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { SupportService } from './support.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { StorageService } from '../storage/storage.service';
 
 @ApiTags('support')
 @Controller('api/v1/support')
 export class SupportController {
-    constructor(private readonly supportService: SupportService) { }
+    constructor(
+        private readonly supportService: SupportService,
+        private readonly storageService: StorageService,
+    ) { }
 
     @Post('donations')
     @ApiOperation({ summary: 'Enregistrer un don financier (Mobile Money)' })
+    @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                donorName: { type: 'string' },
+                donorEmail: { type: 'string' },
+                donorPhone: { type: 'string' },
+                amount: { type: 'number' },
+                currency: { type: 'string', default: 'XAF' },
+                transactionReference: { type: 'string' },
+                projectId: { type: 'string' },
+                file: { type: 'string', format: 'binary', description: 'Preuve de paiement (M-Pesa/AirtelMoney)' },
+            },
+            required: ['donorName', 'amount'],
+        },
+    })
     @ApiResponse({ status: 201, description: 'Don enregistré en attente de vérification.' })
-    async createDonation(@Body() donationDto: any) {
-        return this.supportService.createDonation(donationDto);
+    @UseInterceptors(FileInterceptor('file'))
+    async createDonation(
+        @Body() donationDto: any,
+        @UploadedFile() file?: any,
+    ) {
+        let proofScreenshotUrl = donationDto.proofScreenshotUrl;
+
+        if (file) {
+            // Pour les preuves de dons, on utilise le bucket 'transaction-proofs'
+            proofScreenshotUrl = await this.storageService.uploadFile(file, 'transaction-proofs');
+        }
+
+        return this.supportService.createDonation({
+            ...donationDto,
+            proofScreenshotUrl,
+            amount: parseFloat(donationDto.amount),
+        });
     }
 
     @Post('volunteer')

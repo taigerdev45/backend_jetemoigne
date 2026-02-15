@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 
 @Injectable()
 export class TestimoniesService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private readonly notificationsGateway: NotificationsGateway,
+    ) { }
 
     async create(data: {
         authorName?: string;
@@ -13,12 +17,21 @@ export class TestimoniesService {
         mediaUrl?: string;
         mediaType: any;
     }) {
-        return (this.prisma as any).testimony.create({
+        const testimony = await (this.prisma as any).testimony.create({
             data: {
                 ...data,
                 status: 'recu', // Default status for new testimonies
             },
         });
+
+        // Notifier les admins en temps réel
+        this.notificationsGateway.notifyAdmins('testimony_received', {
+            id: testimony.id,
+            authorName: testimony.authorName,
+            title: testimony.title,
+        });
+
+        return testimony;
     }
 
     async findPublic(query: { page?: number; limit?: number }) {
