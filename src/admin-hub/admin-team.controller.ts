@@ -8,7 +8,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @ApiTags('admin-team')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('api/v1/admin/team')
+@Controller('admin/team')
 export class AdminTeamController {
     constructor(private readonly adminHubService: AdminHubService) { }
 

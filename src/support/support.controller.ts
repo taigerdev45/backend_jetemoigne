@@ -5,7 +5,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from '../storage/storage.service';
 
 @ApiTags('support')
-@Controller('api/v1/support')
+@Controller('support')
 export class SupportController {
     constructor(
         private readonly supportService: SupportService,

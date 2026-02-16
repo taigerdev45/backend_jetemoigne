@@ -15,7 +15,7 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async validateUser(email: string, _pass: string): Promise<Profile | null> {
     if (!_pass) {
@@ -23,10 +23,9 @@ export class AuthService {
     }
 
     // Utilisation de PrismaService avec un typage forcé si nécessaire pour éviter les erreurs "unsafe"
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    const user = (await (this.prisma as any).profile.findUnique({
+    const user = await this.prisma.profile.findUnique({
       where: { email },
-    })) as Profile | null;
+    });
 
     if (user) {
       return user;

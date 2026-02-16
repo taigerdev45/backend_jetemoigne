@@ -3,7 +3,7 @@ import { PublicHubService } from './public-hub.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('public-hub')
-@Controller('api/v1/public')
+@Controller('public-hub')
 export class PublicHubController {
     constructor(private readonly publicHubService: PublicHubService) { }
 

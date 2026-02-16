@@ -5,7 +5,7 @@ import { ApiTags, ApiOperation, ApiConsumes, ApiBody, ApiBearerAuth } from '@nes
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @ApiTags('storage')
-@Controller('api/v1/storage')
+@Controller('storage')
 export class StorageController {
     constructor(private readonly storageService: StorageService) { }
 

@@ -26,13 +26,13 @@ export class ProgramsService {
         }
 
         const [items, total] = await Promise.all([
-            (this.prisma as any).program.findMany({
+            this.prisma.program.findMany({
                 where,
                 skip,
                 take: limit,
                 orderBy: { publishedAt: 'desc' },
             }),
-            (this.prisma as any).program.count({ where }),
+            this.prisma.program.count({ where }),
         ]);
 
         return {
@@ -46,7 +46,7 @@ export class ProgramsService {
     }
 
     async findOneBySlug(slug: string) {
-        const program = await (this.prisma as any).program.findUnique({
+        const program = await this.prisma.program.findUnique({
             where: { slug },
         });
 
@@ -58,13 +58,13 @@ export class ProgramsService {
     }
 
     async getCurrentLive() {
-        return (this.prisma as any).program.findFirst({
+        return this.prisma.program.findFirst({
             where: { isLive: true },
         });
     }
 
     async incrementViews(id: string) {
-        return (this.prisma as any).program.update({
+        return this.prisma.program.update({
             where: { id },
             data: {
                 viewsCount: {

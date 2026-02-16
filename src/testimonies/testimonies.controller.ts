@@ -5,7 +5,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { StorageService } from '../storage/storage.service';
 
 @ApiTags('testimonies')
-@Controller('api/v1/testimonies')
+@Controller('testimonies')
 export class TestimoniesController {
     constructor(
         private readonly testimoniesService: TestimoniesService,
@@ -76,21 +76,4 @@ export class TestimoniesController {
         });
     }
 
-    @Get('admin')
-    @ApiOperation({ summary: 'Lister tous les témoignages pour modération (Admin)' })
-    @ApiQuery({ name: 'page', required: false, type: Number })
-    @ApiQuery({ name: 'limit', required: false, type: Number })
-    @ApiQuery({ name: 'status', required: false, enum: ['recu', 'en_lecture', 'valide', 'rejete', 'programme'] })
-    @ApiResponse({ status: 200, description: 'Liste complète récupérée.' })
-    async findAllAdmin(
-        @Query('page') page?: string,
-        @Query('limit') limit?: string,
-        @Query('status') status?: any,
-    ) {
-        return this.testimoniesService.findAllAdmin({
-            page: page ? parseInt(page, 10) : 1,
-            limit: limit ? parseInt(limit, 10) : 10,
-            status,
-        });
-    }
 }

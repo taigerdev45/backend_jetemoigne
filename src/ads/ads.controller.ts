@@ -3,7 +3,7 @@ import { AdsService } from './ads.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('ads')
-@Controller('api/v1/ads')
+@Controller('ads')
 export class AdsController {
     constructor(private readonly adsService: AdsService) { }
 

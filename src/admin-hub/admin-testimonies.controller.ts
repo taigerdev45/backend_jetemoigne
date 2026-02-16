@@ -8,7 +8,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 @ApiTags('admin-testimonies')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('api/v1/admin/testimonies')
+@Controller('admin/testimonies')
 export class AdminTestimoniesController {
     constructor(private readonly adminHubService: AdminHubService) { }
 

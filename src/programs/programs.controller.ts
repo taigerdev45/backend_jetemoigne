@@ -10,7 +10,7 @@ import { ProgramsService } from './programs.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('programs')
-@Controller('api/v1/programs')
+@Controller('programs')
 export class ProgramsController {
     constructor(private readonly programsService: ProgramsService) { }
 

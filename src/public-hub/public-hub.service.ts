@@ -17,41 +17,41 @@ export class PublicHubService {
             liveInfo,
         ] = await Promise.all([
             // Top 5 featured programs
-            (this.prisma as any).program.findMany({
+            this.prisma.program.findMany({
                 where: { isFeatured: true },
                 take: 5,
                 orderBy: { publishedAt: 'desc' },
             }),
             // Latest 4 news (category info)
-            (this.prisma as any).program.findMany({
+            this.prisma.program.findMany({
                 where: { category: 'info' },
                 take: 4,
                 orderBy: { publishedAt: 'desc' },
             }),
             // Active advertisements
-            (this.prisma as any).ad.findMany({
+            this.prisma.ad.findMany({
                 where: { isActive: true },
                 take: 3,
             }),
             // Urgent projects (latest 2)
-            (this.prisma as any).project.findMany({
+            this.prisma.project.findMany({
                 take: 2,
                 orderBy: { createdAt: 'desc' },
                 include: { milestones: true },
             }),
             // Latest 3 validated testimonies
-            (this.prisma as any).testimony.findMany({
+            this.prisma.testimony.findMany({
                 where: { status: 'valide' },
                 take: 3,
                 orderBy: { createdAt: 'desc' },
             }),
             // Latest 4 books
-            (this.prisma as any).book.findMany({
+            this.prisma.book.findMany({
                 take: 4,
                 orderBy: { createdAt: 'desc' },
             }),
             // Current live info
-            (this.prisma as any).program.findFirst({
+            this.prisma.program.findFirst({
                 where: { isLive: true },
             }),
         ]);
@@ -69,13 +69,13 @@ export class PublicHubService {
 
     async getGlobalStats() {
         const [donorsCount, volunteersCount, testimoniesCount] = await Promise.all([
-            (this.prisma as any).transaction.count({
+            this.prisma.transaction.count({
                 where: { status: 'verifie' },
             }),
-            (this.prisma as any).volunteer.count({
+            this.prisma.volunteer.count({
                 where: { status: 'actif' },
             }),
-            (this.prisma as any).testimony.count({
+            this.prisma.testimony.count({
                 where: { status: 'valide' },
             }),
         ]);
@@ -88,7 +88,7 @@ export class PublicHubService {
     }
 
     async getSettings() {
-        return (this.prisma as any).appSettings.findFirst({
+        return this.prisma.appSettings.findFirst({
             where: { id: 1 },
         });
     }

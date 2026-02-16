@@ -6,7 +6,7 @@ export class AdsService {
     constructor(private prisma: PrismaService) { }
 
     async findActive() {
-        return (this.prisma as any).ad.findMany({
+        return this.prisma.ad.findMany({
             where: {
                 isActive: true,
                 startDate: { lte: new Date() },
@@ -17,7 +17,7 @@ export class AdsService {
     }
 
     async recordClick(id: string) {
-        return (this.prisma as any).ad.update({
+        return this.prisma.ad.update({
             where: { id },
             data: {
                 clicksCount: {
@@ -28,7 +28,7 @@ export class AdsService {
     }
 
     async recordView(id: string) {
-        return (this.prisma as any).ad.update({
+        return this.prisma.ad.update({
             where: { id },
             data: {
                 viewsCount: {

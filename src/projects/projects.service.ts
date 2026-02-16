@@ -6,7 +6,7 @@ export class ProjectsService {
     constructor(private prisma: PrismaService) { }
 
     async findAll() {
-        const projects = await (this.prisma as any).project.findMany({
+        const projects = await this.prisma.project.findMany({
             include: {
                 milestones: true,
             },
@@ -27,7 +27,7 @@ export class ProjectsService {
     }
 
     async findOne(id: string) {
-        const project = await (this.prisma as any).project.findUnique({
+        const project = await this.prisma.project.findUnique({
             where: { id },
             include: {
                 milestones: true,

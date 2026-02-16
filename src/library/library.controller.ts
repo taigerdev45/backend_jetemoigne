@@ -3,7 +3,7 @@ import { LibraryService } from './library.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 @ApiTags('library')
-@Controller('api/v1/library')
+@Controller('library')
 export class LibraryController {
     constructor(private readonly libraryService: LibraryService) { }
 

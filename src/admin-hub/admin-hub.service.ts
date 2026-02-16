@@ -1,35 +1,33 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
 
 @Injectable()
 export class AdminHubService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private readonly notificationsGateway: NotificationsGateway,
+    ) { }
 
     async getDashboardStats() {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const totalVisits = await (this.prisma as any).analyticsDaily.aggregate({
+        const totalVisits = await this.prisma.analyticsDaily.aggregate({
             _sum: { totalVisits: true },
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const donations = await (this.prisma as any).transaction.aggregate({
+        const donations = await this.prisma.transaction.aggregate({
             where: { transactionType: 'don_financier', status: 'verifie' },
             _sum: { amount: true },
             _count: { id: true },
         });
 
-        // Ratio de validation des témoignages
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const testimoniesCount = await (this.prisma as any).testimony.count();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const pendingTestimonies = await (this.prisma as any).testimony.count({
+        const testimoniesCount = await this.prisma.testimony.count();
+        const pendingTestimonies = await this.prisma.testimony.count({
             where: { status: 'recu' },
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const programsCount = await (this.prisma as any).program.count();
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const activeAds = await (this.prisma as any).ad.count({
+        const programsCount = await this.prisma.program.count();
+        const activeAds = await this.prisma.ad.count({
             where: { isActive: true },
         });
 
@@ -51,8 +49,7 @@ export class AdminHubService {
     }
 
     async getDailyAnalytics() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).analyticsDaily.findMany({
+        return await this.prisma.analyticsDaily.findMany({
             orderBy: { date: 'desc' },
             take: 30,
         });
@@ -64,8 +61,7 @@ export class AdminHubService {
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const monthlyRevenue = await (this.prisma as any).transaction.groupBy({
+        const monthlyRevenue = await this.prisma.transaction.groupBy({
             by: ['createdAt'],
             where: {
                 transactionType: 'don_financier',
@@ -76,8 +72,7 @@ export class AdminHubService {
         });
 
         // Répartition par projet
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const revenueByProject = await (this.prisma as any).transaction.groupBy({
+        const revenueByProject = await this.prisma.transaction.groupBy({
             by: ['projectId'],
             where: {
                 transactionType: 'don_financier',
@@ -94,16 +89,14 @@ export class AdminHubService {
 
     async getContentAnalytics() {
         // Top 5 programmes par vues
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const topPrograms = await (this.prisma as any).program.findMany({
+        const topPrograms = await this.prisma.program.findMany({
             orderBy: { viewsCount: 'desc' },
             take: 5,
             select: { title: true, viewsCount: true, category: true },
         });
 
         // Répartition des programmes par catégorie
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const categoryDistribution = await (this.prisma as any).program.groupBy({
+        const categoryDistribution = await this.prisma.program.groupBy({
             by: ['category'],
             _count: { id: true },
         });
@@ -116,8 +109,7 @@ export class AdminHubService {
 
     async getModerationAnalytics() {
         // Répartition des statuts de témoignages
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const statusDistribution = await (this.prisma as any).testimony.groupBy({
+        const statusDistribution = await this.prisma.testimony.groupBy({
             by: ['status'],
             _count: { id: true },
         });
@@ -130,26 +122,23 @@ export class AdminHubService {
     }
 
     // TESTIMONIES MANAGEMENT
-    async getTestimonies(status?: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).testimony.findMany({
+    async getTestimonies(status?: any) {
+        return await this.prisma.testimony.findMany({
             where: status ? { status } : {},
             orderBy: { createdAt: 'desc' },
             include: { reviewer: true },
         });
     }
 
-    async updateTestimonyStatus(id: string, status: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).testimony.update({
+    async updateTestimonyStatus(id: string, status: any) {
+        return await this.prisma.testimony.update({
             where: { id },
             data: { status },
         });
     }
 
     async validateTestimony(id: string, data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).testimony.update({
+        return await this.prisma.testimony.update({
             where: { id },
             data: {
                 ...data,
@@ -159,8 +148,7 @@ export class AdminHubService {
     }
 
     async scheduleTestimony(id: string, scheduledFor: Date) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).testimony.update({
+        return await this.prisma.testimony.update({
             where: { id },
             data: {
                 scheduledFor,
@@ -170,9 +158,8 @@ export class AdminHubService {
     }
 
     // FINANCES MANAGEMENT
-    async getTransactions(status?: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).transaction.findMany({
+    async getTransactions(status?: any) {
+        return await this.prisma.transaction.findMany({
             where: status ? { status } : {},
             orderBy: { createdAt: 'desc' },
             include: { validator: true, project: true },
@@ -180,19 +167,28 @@ export class AdminHubService {
     }
 
     async validateTransaction(id: string, userId: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).transaction.update({
+        const transaction = await this.prisma.transaction.update({
             where: { id },
             data: {
                 status: 'verifie',
                 validatedBy: userId,
             },
         });
+
+        // Notifier via WebSockets
+        if (this.notificationsGateway) {
+            this.notificationsGateway.notifyAdmins('transaction_validated', {
+                id: transaction.id,
+                amount: transaction.amount,
+                validatedBy: userId,
+            });
+        }
+
+        return transaction;
     }
 
     async rejectTransaction(id: string, userId: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).transaction.update({
+        return await this.prisma.transaction.update({
             where: { id },
             data: {
                 status: 'rejete',
@@ -203,45 +199,39 @@ export class AdminHubService {
 
     // TEAM MANAGEMENT
     async getUsers() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).profile.findMany({
+        return await this.prisma.profile.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }
 
-    async updateUserRole(id: string, role: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).profile.update({
+    async updateUserRole(id: string, role: any) {
+        return await this.prisma.profile.update({
             where: { id },
             data: { role },
         });
     }
 
     async getVolunteers() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).volunteer.findMany({
+        return await this.prisma.volunteer.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }
 
     async getPartners() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).partner.findMany({
+        return await this.prisma.partner.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }
 
     // SETTINGS MANAGEMENT
     async getSettings() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).appSettings.findUnique({
+        return await this.prisma.appSettings.findUnique({
             where: { id: 1 },
         });
     }
 
     async updateSettings(data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).appSettings.upsert({
+        return await this.prisma.appSettings.upsert({
             where: { id: 1 },
             update: data,
             create: { id: 1, ...data },
@@ -249,92 +239,80 @@ export class AdminHubService {
     }
 
     // PROGRAMS MANAGEMENT
-    async getPrograms(category?: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).program.findMany({
+    async getPrograms(category?: any) {
+        return await this.prisma.program.findMany({
             where: category ? { category } : {},
             orderBy: { createdAt: 'desc' },
         });
     }
 
     async createProgram(data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).program.create({
+        return await this.prisma.program.create({
             data,
         });
     }
 
     async updateProgram(id: string, data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).program.update({
+        return await this.prisma.program.update({
             where: { id },
             data,
         });
     }
 
     async deleteProgram(id: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).program.delete({
+        return await this.prisma.program.delete({
             where: { id },
         });
     }
 
     // ADS MANAGEMENT
     async getAds() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).ad.findMany({
+        return await this.prisma.ad.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }
 
     async createAd(data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).ad.create({
+        return await this.prisma.ad.create({
             data,
         });
     }
 
     async updateAd(id: string, data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).ad.update({
+        return await this.prisma.ad.update({
             where: { id },
             data,
         });
     }
 
     async deleteAd(id: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).ad.delete({
+        return await this.prisma.ad.delete({
             where: { id },
         });
     }
 
     // BOOKS MANAGEMENT
     async getBooks() {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).book.findMany({
+        return await this.prisma.book.findMany({
             orderBy: { createdAt: 'desc' },
         });
     }
 
     async createBook(data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).book.create({
+        return await this.prisma.book.create({
             data,
         });
     }
 
     async updateBook(id: string, data: any) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).book.update({
+        return await this.prisma.book.update({
             where: { id },
             data,
         });
     }
 
     async deleteBook(id: string) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        return await (this.prisma as any).book.delete({
+        return await this.prisma.book.delete({
             where: { id },
         });
     }

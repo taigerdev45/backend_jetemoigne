@@ -24,7 +24,7 @@ export class SupportService {
         // Si transactionType n'est pas fourni, on assume que c'est un don financier
         const transaction_type = data.transactionType || 'don_financier';
 
-        const transaction = await (this.prisma as any).transaction.create({
+        const transaction = await this.prisma.transaction.create({
             data: {
                 ...data,
                 transactionType: transaction_type,
@@ -50,7 +50,7 @@ export class SupportService {
         skills: string[];
         availability?: string;
     }) {
-        return (this.prisma as any).volunteer.create({
+        return this.prisma.volunteer.create({
             data: {
                 ...data,
                 status: 'actif',
@@ -65,7 +65,7 @@ export class SupportService {
         logoUrl?: string;
         websiteUrl?: string;
     }) {
-        return (this.prisma as any).partner.create({
+        return this.prisma.partner.create({
             data,
         });
     }

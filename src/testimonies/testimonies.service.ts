@@ -18,7 +18,7 @@ export class TestimoniesService {
         mediaType: any;
     }) {
         try {
-            const testimony = await (this.prisma as any).testimony.create({
+            const testimony = await this.prisma.testimony.create({
                 data: {
                     ...data,
                     status: 'recu', // Default status for new testimonies
@@ -46,13 +46,13 @@ export class TestimoniesService {
         const skip = (page - 1) * limit;
 
         const [items, total] = await Promise.all([
-            (this.prisma as any).testimony.findMany({
+            this.prisma.testimony.findMany({
                 where: { status: 'valide' },
                 skip,
                 take: limit,
                 orderBy: { createdAt: 'desc' },
             }),
-            (this.prisma as any).testimony.count({
+            this.prisma.testimony.count({
                 where: { status: 'valide' },
             }),
         ]);
@@ -75,13 +75,13 @@ export class TestimoniesService {
         if (status) where.status = status;
 
         const [items, total] = await Promise.all([
-            (this.prisma as any).testimony.findMany({
+            this.prisma.testimony.findMany({
                 where,
                 skip,
                 take: limit,
                 orderBy: { createdAt: 'desc' },
             }),
-            (this.prisma as any).testimony.count({ where }),
+            this.prisma.testimony.count({ where }),
         ]);
 
         return {

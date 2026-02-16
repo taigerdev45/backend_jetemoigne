@@ -10,12 +10,12 @@ export class LibraryService {
         const skip = (page - 1) * limit;
 
         const [items, total] = await Promise.all([
-            (this.prisma as any).book.findMany({
+            this.prisma.book.findMany({
                 skip,
                 take: limit,
                 orderBy: { createdAt: 'desc' },
             }),
-            (this.prisma as any).book.count(),
+            this.prisma.book.count(),
         ]);
 
         return {
@@ -29,7 +29,7 @@ export class LibraryService {
     }
 
     async findOne(id: string) {
-        const book = await (this.prisma as any).book.findUnique({
+        const book = await this.prisma.book.findUnique({
             where: { id },
         });
 
@@ -41,7 +41,7 @@ export class LibraryService {
     }
 
     async recordDownload(id: string) {
-        return (this.prisma as any).book.update({
+        return this.prisma.book.update({
             where: { id },
             data: {
                 downloadsCount: {

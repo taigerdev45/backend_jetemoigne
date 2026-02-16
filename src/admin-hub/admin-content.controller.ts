@@ -23,7 +23,7 @@ import { StorageService } from '../storage/storage.service';
 @ApiTags('admin-content')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Controller('api/v1/admin/content')
+@Controller('admin/content')
 export class AdminContentController {
     constructor(
         private readonly adminHubService: AdminHubService,
