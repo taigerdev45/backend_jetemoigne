@@ -36,8 +36,9 @@ export class PaymentService {
                 },
                 {
                     headers: {
-                        Authorization: process.env.NOTCH_PAY_SECRET_KEY, // À remplir dans .env
+                        Authorization: process.env.NOTCH_PAY_PUBLIC_KEY, // clé publique pour l'initialisation
                         Accept: 'application/json',
+                        'Content-Type': 'application/json',
                     },
                 },
             );
@@ -45,10 +46,13 @@ export class PaymentService {
             return response.data;
         } catch (error) {
             const notchError = error.response?.data;
-            this.logger.error('Erreur lors de l\'initialisation du paiement Notch Pay', notchError || error.message);
-            // Throw with the actual Notch Pay error details for debugging
+            const httpStatus = error.response?.status;
+            this.logger.error(
+                `Erreur Notch Pay (HTTP ${httpStatus}) lors de l'initialisation`,
+                JSON.stringify(notchError || error.message),
+            );
             throw Object.assign(
-                new Error('Échec de l\'initialisation du paiement'),
+                new Error(`Notch Pay (${httpStatus ?? 'network'}): ${JSON.stringify(notchError) || error.message}`),
                 { notchPayDetails: notchError },
             );
         }

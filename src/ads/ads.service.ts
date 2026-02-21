@@ -178,9 +178,11 @@ export class AdsService {
         } catch (error) {
             // Rollback
             await this.prisma.transaction.delete({ where: { id: transaction.id } });
-            throw new BadRequestException(
-                `Impossible d'initialiser le paiement: ${error.message}`,
-            );
+            throw new BadRequestException({
+                message: `Impossible d'initialiser le paiement Notch Pay`,
+                notchpay_error: error.message,
+                notchpay_details: (error as any).notchPayDetails ?? null,
+            });
         }
     }
 }
