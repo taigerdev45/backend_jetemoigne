@@ -58,6 +58,20 @@ export class SupportController {
 
     @Post('donations/initiate')
     @ApiOperation({ summary: 'Initier un don automatique via Notch Pay' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                donorName: { type: 'string', example: 'Jean Gabin' },
+                donorEmail: { type: 'string', example: 'jean@example.com' },
+                donorPhone: { type: 'string', example: '+24106000000' },
+                amount: { type: 'number', example: 1000 },
+                currency: { type: 'string', default: 'XAF', example: 'XAF' },
+                projectId: { type: 'string', description: 'ID du projet (optionnel)' },
+            },
+            required: ['donorName', 'donorEmail', 'amount'],
+        },
+    })
     @ApiResponse({ status: 201, description: 'Lien de paiement Notch Pay généré.' })
     async initiateDonation(@Body() donationDto: any) {
         return this.supportService.createDonation({
@@ -69,6 +83,19 @@ export class SupportController {
 
     @Post('volunteer')
     @ApiOperation({ summary: 'Soumettre une candidature de bénévolat' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                fullName: { type: 'string', example: 'Paul Nguema' },
+                email: { type: 'string', example: 'paul@example.com' },
+                phone: { type: 'string', example: '+24107000000' },
+                skills: { type: 'array', items: { type: 'string' }, example: ['Vidéo', 'Montage'] },
+                availability: { type: 'string', example: 'Week-ends et soirées' },
+            },
+            required: ['fullName'],
+        },
+    })
     @ApiResponse({ status: 201, description: 'Candidature enregistrée.' })
     async createVolunteer(@Body() volunteerDto: any) {
         return this.supportService.createVolunteer(volunteerDto);
@@ -76,6 +103,19 @@ export class SupportController {
 
     @Post('partner')
     @ApiOperation({ summary: 'Soumettre une proposition de partenariat' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                name: { type: 'string', example: 'Société XYZ' },
+                activityDomain: { type: 'string', example: 'Médias & Communication' },
+                country: { type: 'string', example: 'Gabon' },
+                logoUrl: { type: 'string', example: 'https://...' },
+                websiteUrl: { type: 'string', example: 'https://xyz.com' },
+            },
+            required: ['name'],
+        },
+    })
     @ApiResponse({ status: 201, description: 'Proposition enregistrée.' })
     async createPartner(@Body() partnerDto: any) {
         return this.supportService.createPartner(partnerDto);

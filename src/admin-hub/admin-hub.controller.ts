@@ -1,6 +1,6 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
 import { AdminHubService } from './admin-hub.service';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, ApiResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -57,6 +57,19 @@ export class AdminHubController {
     @Patch('settings')
     @Roles('super_admin')
     @ApiOperation({ summary: 'Mettre à jour les paramètres vitaux (Super Admin)' })
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                airtelMoneyNumber: { type: 'string', example: '+24174000000' },
+                moovMoneyNumber: { type: 'string', example: '+24166000000' },
+                contactEmail: { type: 'string', example: 'contact@jetemoigne.tv' },
+                donationRules: { type: 'string', example: 'Don minimum : 1000 XAF' },
+                siteName: { type: 'string', example: 'Je Témoigne TV' },
+            },
+        },
+    })
+    @ApiResponse({ status: 200, description: 'Paramètres mis à jour avec succès.' })
     async updateSettings(@Body() data: any) {
         return this.adminHubService.updateSettings(data);
     }

@@ -43,6 +43,21 @@ export class AdminContentController {
     @Roles('admin', 'super_admin')
     @ApiOperation({ summary: 'Créer un nouveau programme avec médias' })
     @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                title: { type: 'string', example: 'Journal de 20h' },
+                category: { type: 'string', example: 'info', enum: ['info', 'jeunesse_cinema', 'divertissement', 'podcast', 'evangelisation', 'concert', 'temoignage_live'] },
+                format: { type: 'string', example: 'video', enum: ['video', 'audio', 'ecrit', 'image'] },
+                description: { type: 'string', example: 'Le journal du soir...' },
+                duration: { type: 'number', example: 30 },
+                thumbnail: { type: 'string', format: 'binary', description: 'Image miniature' },
+                media: { type: 'string', format: 'binary', description: 'Fichier vidéo, audio ou image' },
+            },
+            required: ['title', 'category', 'format'],
+        },
+    })
     @UseInterceptors(
         FileFieldsInterceptor([
             { name: 'thumbnail', maxCount: 1 },
@@ -77,6 +92,20 @@ export class AdminContentController {
     @Roles('admin', 'super_admin')
     @ApiOperation({ summary: 'Créer une publicité avec bannière' })
     @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                title: { type: 'string', example: 'Pub Airtel Gabon' },
+                redirectUrl: { type: 'string', example: 'https://airtel.ga' },
+                position: { type: 'string', example: 'banner_top', enum: ['banner_top', 'banner_bottom', 'sidebar', 'interstitial'] },
+                startDate: { type: 'string', format: 'date', example: '2026-03-01' },
+                endDate: { type: 'string', format: 'date', example: '2026-03-31' },
+                file: { type: 'string', format: 'binary', description: 'Image de la bannière publicitaire' },
+            },
+            required: ['title', 'redirectUrl'],
+        },
+    })
     @UseInterceptors(FileInterceptor('file'))
     async createAd(@Body() dto: any, @UploadedFile() file?: any) {
         let mediaUrl = dto.mediaUrl;
@@ -97,6 +126,21 @@ export class AdminContentController {
     @Roles('admin', 'super_admin')
     @ApiOperation({ summary: 'Ajouter un ouvrage numérique avec PDF et Couverture' })
     @ApiConsumes('multipart/form-data')
+    @ApiBody({
+        schema: {
+            type: 'object',
+            properties: {
+                title: { type: 'string', example: 'La Parole qui Libère' },
+                author: { type: 'string', example: 'Pasteur Jean Dupont' },
+                description: { type: 'string', example: 'Un livre sur la foi et la guérison.' },
+                price: { type: 'number', example: 3000 },
+                currency: { type: 'string', example: 'XAF' },
+                pdf: { type: 'string', format: 'binary', description: 'Fichier PDF de l ouvrage' },
+                cover: { type: 'string', format: 'binary', description: 'Image de couverture' },
+            },
+            required: ['title', 'author'],
+        },
+    })
     @UseInterceptors(
         FileFieldsInterceptor([
             { name: 'pdf', maxCount: 1 },
@@ -126,18 +170,21 @@ export class AdminContentController {
 
     @Delete('programs/:id')
     @Roles('super_admin')
+    @ApiOperation({ summary: 'Supprimer un programme (Super Admin)' })
     async deleteProgram(@Param('id') id: string) {
         return this.adminHubService.deleteProgram(id);
     }
 
     @Delete('ads/:id')
     @Roles('super_admin')
+    @ApiOperation({ summary: 'Supprimer une publicité (Super Admin)' })
     async deleteAd(@Param('id') id: string) {
         return this.adminHubService.deleteAd(id);
     }
 
     @Delete('books/:id')
     @Roles('super_admin')
+    @ApiOperation({ summary: 'Supprimer un ouvrage (Super Admin)' })
     async deleteBook(@Param('id') id: string) {
         return this.adminHubService.deleteBook(id);
     }
