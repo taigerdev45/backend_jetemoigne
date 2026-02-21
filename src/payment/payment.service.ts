@@ -36,8 +36,7 @@ export class PaymentService {
                 },
                 {
                     headers: {
-                        Authorization: process.env.NOTCH_PAY_PUBLIC_KEY,
-                        'X-Public-Key': process.env.NOTCH_PAY_PUBLIC_KEY, // Parfois requis par Notch Pay pour identifier le compte
+                        Authorization: process.env.NOTCH_PAY_SECRET_KEY,
                         Accept: 'application/json',
                         'Content-Type': 'application/json',
                     },
