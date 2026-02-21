@@ -44,8 +44,13 @@ export class PaymentService {
 
             return response.data;
         } catch (error) {
-            this.logger.error('Erreur lors de l\'initialisation du paiement Notch Pay', error.response?.data || error.message);
-            throw new Error('Échec de l\'initialisation du paiement');
+            const notchError = error.response?.data;
+            this.logger.error('Erreur lors de l\'initialisation du paiement Notch Pay', notchError || error.message);
+            // Throw with the actual Notch Pay error details for debugging
+            throw Object.assign(
+                new Error('Échec de l\'initialisation du paiement'),
+                { notchPayDetails: notchError },
+            );
         }
     }
 

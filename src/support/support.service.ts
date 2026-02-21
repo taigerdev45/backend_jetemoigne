@@ -76,7 +76,8 @@ export class SupportService {
                     // Si l'initiation échoue, on garde la transaction mais on signale l'erreur
                     return {
                         ...transaction,
-                        notchpay_error: "Échec de l'initiation du paiement Notch Pay. Vérifiez les clés API sur le serveur.",
+                        notchpay_error: error.message,
+                        notchpay_details: (error as any).notchPayDetails ?? null,
                     };
                 }
             }
