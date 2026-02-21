@@ -424,6 +424,33 @@ file: [screenshot preuve paiement, max 10MB]
 
 ---
 
+### `POST /api/v1/support/donations/initiate`
+
+**Description** : Initier un don automatique via Notch Pay (Airtel, Moov, Cartes). Génère un lien de paiement.
+
+**Body** :
+```json
+{
+  "donorName": "Paul Nguema",
+  "donorEmail": "paul@example.com",
+  "amount": 5000,
+  "currency": "XAF",
+  "projectId": "uuid-projet-optionnel"
+}
+```
+
+**Réponse 201** :
+```json
+{
+  "id": "uuid-transaction-interne",
+  "status": "en_attente",
+  "payment_url": "https://api.notchpay.co/checkout/...",
+  "reference": "NOTCH-REF-..."
+}
+```
+
+---
+
 ### `POST /api/v1/support/volunteers`
 
 **Description** : Candidature bénévolat.
@@ -1018,3 +1045,17 @@ npm run start:prod
 
 **Documentation maintenue par l'équipe technique Je Temoigne-TV**  
 *Dernière mise à jour : 16 Février 2026*
+
+## 🚧 Webhooks & Automatisation
+
+### `POST /api/v1/payments/webhook`
+
+**Description** : Réception des notifications de Notch Pay. Sécurisé par signature HMAC (SHA256).
+
+**Headers** :
+- `x-notch-signature` : Signature envoyée par Notch Pay.
+
+**Événements gérés** :
+- `payment.complete` : Marque la transaction comme `verifie`, met à jour le montant du projet associé et notifie les admins.
+
+---

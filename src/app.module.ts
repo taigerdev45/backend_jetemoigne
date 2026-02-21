@@ -13,10 +13,11 @@ import { SupportModule } from './support/support.module';
 import { AdminHubModule } from './admin-hub/admin-hub.module';
 import { StorageModule } from './storage/storage.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
-  imports: [AuthModule, PrismaModule, PublicHubModule, ProgramsModule, TestimoniesModule, ProjectsModule, LibraryModule, AdsModule, SupportModule, AdminHubModule, StorageModule, NotificationsModule],
+  imports: [AuthModule, PrismaModule, PublicHubModule, ProgramsModule, TestimoniesModule, ProjectsModule, LibraryModule, AdsModule, SupportModule, AdminHubModule, StorageModule, NotificationsModule, PaymentModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

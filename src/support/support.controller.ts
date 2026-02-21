@@ -56,6 +56,17 @@ export class SupportController {
         });
     }
 
+    @Post('donations/initiate')
+    @ApiOperation({ summary: 'Initier un don automatique via Notch Pay' })
+    @ApiResponse({ status: 201, description: 'Lien de paiement Notch Pay généré.' })
+    async initiateDonation(@Body() donationDto: any) {
+        return this.supportService.createDonation({
+            ...donationDto,
+            amount: parseFloat(donationDto.amount),
+            automatic: true,
+        });
+    }
+
     @Post('volunteer')
     @ApiOperation({ summary: 'Soumettre une candidature de bénévolat' })
     @ApiResponse({ status: 201, description: 'Candidature enregistrée.' })
