@@ -133,8 +133,8 @@ export class AdminContentController {
                 title: { type: 'string', example: 'La Parole qui Libère' },
                 author: { type: 'string', example: 'Pasteur Jean Dupont' },
                 description: { type: 'string', example: 'Un livre sur la foi et la guérison.' },
-                price: { type: 'number', example: 3000 },
-                currency: { type: 'string', example: 'XAF' },
+                price: { type: 'number', example: 3000, description: 'Prix en XAF. Si 0 ou absent, le livre est considéré comme Gratuit.' },
+                currency: { type: 'string', example: 'XAF', default: 'XAF' },
                 pdf: { type: 'string', format: 'binary', description: 'Fichier PDF de l ouvrage' },
                 cover: { type: 'string', format: 'binary', description: 'Image de couverture' },
             },
@@ -159,8 +159,13 @@ export class AdminContentController {
             coverUrl = await this.storageService.uploadFile(files.cover[0], 'public-assets');
         }
 
+        const price = dto.price ? parseFloat(dto.price) : 0;
+        const isFree = price <= 0;
+
         return this.adminHubService.createBook({
             ...dto,
+            price,
+            isFree,
             pdfUrl,
             coverUrl,
         });
