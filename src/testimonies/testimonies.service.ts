@@ -1,0 +1,96 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsGateway } from '../notifications/notifications.gateway';
+
+@Injectable()
+export class TestimoniesService {
+    constructor(
+        private prisma: PrismaService,
+        private readonly notificationsGateway: NotificationsGateway,
+    ) { }
+
+    async create(data: {
+        authorName?: string;
+        authorEmail?: string;
+        title?: string;
+        contentText?: string;
+        mediaUrl?: string;
+        mediaType: any;
+    }) {
+        try {
+            const testimony = await this.prisma.testimony.create({
+                data: {
+                    ...data,
+                    status: 'recu', // Default status for new testimonies
+                },
+            });
+
+            // Notifier les admins en temps réel
+            if (this.notificationsGateway) {
+                this.notificationsGateway.notifyAdmins('testimony_received', {
+                    id: testimony.id,
+                    authorName: testimony.authorName,
+                    title: testimony.title,
+                });
+            }
+
+            return testimony;
+        } catch (error: any) {
+            console.error('TestimoniesService: Erreur lors de la creation Prisma:', error);
+            throw error;
+        }
+    }
+
+    async findPublic(query: { page?: number; limit?: number }) {
+        const { page = 1, limit = 10 } = query;
+        const skip = (page - 1) * limit;
+
+        const [items, total] = await Promise.all([
+            this.prisma.testimony.findMany({
+                where: { status: 'valide' },
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+            }),
+            this.prisma.testimony.count({
+                where: { status: 'valide' },
+            }),
+        ]);
+
+        return {
+            items,
+            meta: {
+                total,
+                page,
+                lastPage: Math.ceil(total / limit),
+            },
+        };
+    }
+
+    async findAllAdmin(query: { page?: number; limit?: number; status?: any }) {
+        const { page = 1, limit = 10, status } = query;
+        const skip = (page - 1) * limit;
+
+        const where: any = {};
+        if (status) where.status = status;
+
+        const [items, total] = await Promise.all([
+            this.prisma.testimony.findMany({
+                where,
+                skip,
+                take: limit,
+                orderBy: { createdAt: 'desc' },
+            }),
+            this.prisma.testimony.count({ where }),
+        ]);
+
+        return {
+            items,
+            meta: {
+                total,
+                page,
+                lastPage: Math.ceil(total / limit),
+            },
+        };
+    }
+}

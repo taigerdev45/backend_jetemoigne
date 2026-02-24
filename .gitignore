@@ -1,0 +1,58 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS
+.DS_Store
+
+# Tests
+/coverage
+/.nyc_output
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# NestJS
+/dist
+/node_modules
+/thumbnails
+/optimized
+
+# Prisma
+/prisma/*.db
+/prisma/*.db-journal
+/prisma/*.bak
+
+# Migration scripts (temporary)
+sync-db-manual.js
+apply-migration-safe.js
+migrate.sql
+migrate_utf8.sql
+
+# Env
+.env
+.env.test
+.env.production
+.env.local
